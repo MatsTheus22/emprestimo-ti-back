@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Tenant único da v1 ("suporte_ti") nasce pelo seed — ADR-001 §6.
+model Tenant {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  memberships Membership[]
+  equipment   Equipment[]
+  loans       Loan[]
+  auditLogs   AuditLog[]
+
+  @@map("tenants")
+}
+
+// Vínculo usuário-tenant decidido no ADR-001 §6. user_id referencia
+// auth.users (schema do Supabase Auth, fora do Prisma) — a FK entra
+// como SQL bruto na migration, não como @relation.
+model Membership {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  role      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId])
+  @@map("memberships")
+}
+
+// Catálogo do PRD item 2. Cabo é item individual, como os demais.
+model Equipment {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  category  String
+  name      String
+  assetTag  String?  @map("asset_tag")
+  status    String   @default("disponivel")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  loans  Loan[]
+
+  @@map("equipment")
+}
+
+// PRD itens 3-5. Atraso é calculado (dueAt < now() e returnedAt nulo),
+// não persistido. Limite de 3 itens simultâneos fica na camada de
+// aplicação, não é constraint de banco.
+model Loan {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  equipmentId String    @map("equipment_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  borrowedAt  DateTime  @default(now()) @map("borrowed_at")
+  dueAt       DateTime  @default(dbgenerated("(now() + interval '14 days')")) @map("due_at")
+  returnedAt  DateTime? @map("returned_at")
+  returnedBy  String?   @map("returned_by") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  equipment Equipment @relation(fields: [equipmentId], references: [id])
+
+  @@map("loans")
+}
+
+// Decidido no ADR-001 §10 — append-only, nasce com o schema.
+model AuditLog {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  actorId    String?  @map("actor_id") @db.Uuid
+  action     String
+  resource   String
+  resourceId String?  @map("resource_id") @db.Uuid
+  metadata   Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("audit_log")
+}
