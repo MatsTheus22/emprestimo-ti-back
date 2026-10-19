@@ -7,6 +7,9 @@ import { ProblemDetailsFilter } from './common/problem-details.filter';
 import type { Env } from './config/env';
 import { ENV } from './config/env.module';
 
+// ADR-001 §4: versionamento por prefixo de rota.
+export const API_PREFIX = 'v1';
+
 // Usado pelo bootstrap local (main.ts), pelo handler serverless e pelos
 // testes, para que os três configurem a app exatamente do mesmo jeito.
 export function configureApp<T extends INestApplication>(app: T): T {
@@ -16,7 +19,7 @@ export function configureApp<T extends INestApplication>(app: T): T {
   // a sessão vai em header Authorization, não em cookie.
   app.use(helmet());
   app.enableCors({ origin: env.CORS_ORIGIN, credentials: true });
-  app.setGlobalPrefix('v1');
+  app.setGlobalPrefix(API_PREFIX);
   app.useGlobalFilters(new ProblemDetailsFilter());
   return app;
 }

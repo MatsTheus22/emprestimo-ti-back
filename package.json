@@ -11,22 +11,25 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:reset": "prisma migrate reset",
     "prisma:generate": "prisma generate",
-    "lint": "eslint .",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/eslint/",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
     "test:unit": "jest",
     "test:db": "jest -c jest.db.config.js",
     "postinstall": "prisma generate",
-    "seed:demo": "ts-node --transpile-only prisma/seed-demo.ts"
+    "seed:demo": "ts-node --transpile-only prisma/seed-demo.ts",
+    "openapi": "ts-node --transpile-only scripts/generate-openapi.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.7",
     "@nestjs/core": "^11.2.7",
     "@nestjs/platform-express": "^11.2.7",
+    "@nestjs/swagger": "^11.4.7",
     "@prisma/client": "^6.0.0",
     "helmet": "^8.3.0",
     "jose": "^5.10.0",
+    "nestjs-zod": "^5.5.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "zod": "^4.6.7"
