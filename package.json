@@ -17,7 +17,8 @@
     "prepare": "husky",
     "test:unit": "jest",
     "test:db": "jest -c jest.db.config.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "seed:demo": "ts-node --transpile-only prisma/seed-demo.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.2.7",
@@ -33,6 +34,7 @@
     "@eslint/js": "^9.39.5",
     "@nestjs/cli": "^11.0.24",
     "@nestjs/testing": "^11.2.7",
+    "@supabase/supabase-js": "^2.118.0",
     "@types/express": "^5.0.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^24.19.2",
@@ -70,5 +72,8 @@
     "@prisma/engines@6.19.3": true,
     "@prisma/client@6.19.3": true,
     "supabase@2.121.0": true
+  },
+  "prisma": {
+    "seed": "ts-node --transpile-only prisma/seed.ts"
   }
 }
