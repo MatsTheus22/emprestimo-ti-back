@@ -16,5 +16,5 @@
     "baseUrl": "./",
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src", "test", "prisma", "scripts"]
+  "include": ["src", "test", "prisma", "scripts", "api"]
 }
