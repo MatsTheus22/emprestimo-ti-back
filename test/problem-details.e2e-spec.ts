@@ -7,8 +7,11 @@ import {
 } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import { Public } from '../src/modules/auth/public.decorator';
 import { createTestApp } from './utils/create-test-app';
 
+// Público: aqui só interessa o formato do erro, não a autenticação.
+@Public()
 @Controller('__test__')
 class FailingController {
   @Get('forbidden')
@@ -31,7 +34,7 @@ describe('Problem Details (RFC 9457)', () => {
   let app: INestApplication<App>;
 
   beforeAll(async () => {
-    app = await createTestApp([FailingController]);
+    app = await createTestApp({ controllers: [FailingController] });
   });
 
   afterAll(async () => {
