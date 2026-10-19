@@ -9,7 +9,7 @@ describe('loadEnv', () => {
     const env = loadEnv({ ...valid, PORT: undefined });
 
     expect(env.PORT).toBe(3000);
-    expect(env.CORS_ORIGIN).toBe('http://localhost:5173');
+    expect(env.CORS_ORIGIN).toEqual(['http://localhost:5173']);
   });
 
   it('test_ca_06_variavel_ausente_falha_nomeando_a_variavel', () => {
@@ -38,6 +38,23 @@ describe('boot da aplicação', () => {
     delete process.env.CORS_ORIGIN;
 
     await expect(Test.createTestingModule({ imports: [AppModule] }).compile()).rejects.toThrow(
+      /CORS_ORIGIN/,
+    );
+  });
+});
+
+describe('CORS_ORIGIN', () => {
+  it('test_ca_07_aceita_lista_de_origens_separadas_por_virgula', () => {
+    const env = loadEnv({
+      ...valid,
+      CORS_ORIGIN: 'http://localhost:5173, https://front.vercel.app',
+    });
+
+    expect(env.CORS_ORIGIN).toEqual(['http://localhost:5173', 'https://front.vercel.app']);
+  });
+
+  it('test_ca_07_rejeita_origem_invalida_na_lista', () => {
+    expect(() => loadEnv({ ...valid, CORS_ORIGIN: 'http://localhost:5173,nao-e-url' })).toThrow(
       /CORS_ORIGIN/,
     );
   });

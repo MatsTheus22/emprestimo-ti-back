@@ -11,7 +11,11 @@ const envSchema = z.object({
   SUPABASE_JWT_ISSUER: z.url(),
   SUPABASE_JWKS_URL: z.url(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  CORS_ORIGIN: z.url(),
+  // Allowlist: uma ou mais origens separadas por vírgula (ex.: local + preview).
+  CORS_ORIGIN: z
+    .string()
+    .transform((value) => value.split(',').map((origin) => origin.trim()))
+    .pipe(z.array(z.url({ protocol: /^https?$/ })).min(1)),
   SENTRY_DSN: z.union([z.url(), z.literal('')]).optional(),
 });
 
