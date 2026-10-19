@@ -85,8 +85,11 @@ describe.each(TABLES)('RLS em $table', ({ table, tenantColumn }) => {
 
   it(`test_ca_04_${table}_dono_das_tabelas_ve_os_dois_tenants`, async () => {
     // Controle: prova que as linhas de A existem e foram escondidas pela policy.
+    // Filtra pelos tenants deste arquivo: outros testes usam o mesmo banco.
     const rows = await prisma.$queryRawUnsafe<{ tenant: string }[]>(
-      `select "${tenantColumn}"::text as tenant from "${table}"`,
+      `select "${tenantColumn}"::text as tenant from "${table}" where "${tenantColumn}" in ($1::uuid, $2::uuid)`,
+      TENANT_A,
+      TENANT_B,
     );
 
     expect(rows.map((row) => row.tenant).sort()).toEqual([TENANT_A, TENANT_B].sort());

@@ -1,11 +1,21 @@
 import { PrismaService } from '../../src/prisma/prisma.service';
 
-// Só existe quando o global-setup subiu o container. Sem ele, o teste
-// falha em vez de cair em outro banco (como o Supabase local de dev).
-export function createTestPrisma(): PrismaService {
-  const url = process.env.TEST_DATABASE_URL;
+// As URLs só existem quando o global-setup subiu o container. Sem elas, o
+// teste falha em vez de cair em outro banco (como o Supabase local de dev).
+function requireUrl(name: 'TEST_DATABASE_URL' | 'TEST_SUPERUSER_DATABASE_URL'): string {
+  const url = process.env[name];
   if (!url) {
-    throw new Error('TEST_DATABASE_URL ausente: rode os testes de banco com `npm run test:db`.');
+    throw new Error(`${name} ausente: rode os testes de banco com \`npm run test:db\`.`);
   }
-  return new PrismaService({ DATABASE_URL: url });
+  return url;
+}
+
+// Conecta como `postgres`, dono das tabelas — o mesmo papel da aplicação.
+export function createTestPrisma(): PrismaService {
+  return new PrismaService({ DATABASE_URL: requireUrl('TEST_DATABASE_URL') });
+}
+
+// Conecta como superusuário, para assumir papéis internos do Supabase.
+export function createSuperuserTestPrisma(): PrismaService {
+  return new PrismaService({ DATABASE_URL: requireUrl('TEST_SUPERUSER_DATABASE_URL') });
 }
