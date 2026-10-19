@@ -3,7 +3,8 @@ module.exports = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.*\\.db-spec\\.ts$',
-  transform: { '^.+\\.ts$': 'ts-jest' },
+  // Só transpila; tipos são checados por build e lint.
+  transform: { '^.+\\.ts$': ['ts-jest', { tsconfig: { isolatedModules: true } }] },
   testEnvironment: 'node',
   setupFiles: ['<rootDir>/test/setup-env.ts'],
   globalSetup: '<rootDir>/test/db/global-setup.ts',
