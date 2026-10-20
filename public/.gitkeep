@@ -1,0 +1,3 @@
+# A API não serve arquivo estático. Esta pasta vazia é o outputDirectory
+# da Vercel (vercel.json): sem ela a Vercel serviria a raiz do repositório
+# (package.json, openapi.json, prisma/...) como arquivos públicos.

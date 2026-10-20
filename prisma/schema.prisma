@@ -27,11 +27,13 @@ model Tenant {
 // auth.users (schema do Supabase Auth, fora do Prisma) — a FK entra
 // como SQL bruto na migration, não como @relation.
 model Membership {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  role      String
-  createdAt DateTime @default(now()) @map("created_at")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  role        String
+  // Nome exibido na interface (spec 001, CA-02).
+  displayName String   @default("") @map("display_name")
+  createdAt   DateTime @default(now()) @map("created_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
