@@ -1,0 +1,122 @@
+[
+  {
+    "assetTag": "TI-0001",
+    "name": "Notebook 14 polegadas",
+    "category": "notebook",
+    "status": "disponivel",
+    "imagePath": "TI-0001.jpg",
+    "photoSource": "https://pixabay.com/photos/laptop-workstation-browsing-tablet-1483974/",
+    "photoAuthor": "Monoar_CGI_Artist",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0002",
+    "name": "Notebook 15 polegadas",
+    "category": "notebook",
+    "status": "disponivel",
+    "imagePath": "TI-0002.jpg",
+    "photoSource": "https://pixabay.com/photos/technology-laptop-computer-netbook-791032/",
+    "photoAuthor": "kaboompics",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0003",
+    "name": "Notebook 13 polegadas",
+    "category": "notebook",
+    "status": "disponivel",
+    "imagePath": "TI-0003.jpg",
+    "photoSource": "https://pixabay.com/photos/electronics-technology-devices-6801339/",
+    "photoAuthor": "Mariakray",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0004",
+    "name": "Notebook 15 polegadas",
+    "category": "notebook",
+    "status": "manutencao",
+    "imagePath": "TI-0004.jpg",
+    "photoSource": "https://pixabay.com/photos/laptop-workstaion-office-work-4906312/",
+    "photoAuthor": "Deeezy",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0005",
+    "name": "Monitor 24 polegadas",
+    "category": "monitor",
+    "status": "disponivel",
+    "imagePath": "TI-0005.jpg",
+    "photoSource": "https://pixabay.com/photos/desk-computer-modern-keyboard-1140699/",
+    "photoAuthor": "theglassdesk",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0006",
+    "name": "Monitor 27 polegadas",
+    "category": "monitor",
+    "status": "disponivel",
+    "imagePath": "TI-0006.jpg",
+    "photoSource": "https://pixabay.com/photos/computer-laptop-technology-desk-3114274/",
+    "photoAuthor": "malawiheiko",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0007",
+    "name": "Monitor 22 polegadas",
+    "category": "monitor",
+    "status": "manutencao",
+    "imagePath": "TI-0007.jpg",
+    "photoSource": "https://pixabay.com/photos/poster-mockup-mockup-poster-frame-2853836/",
+    "photoAuthor": "RaniRamli",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0008",
+    "name": "Cabo HDMI 2 m",
+    "category": "cabo",
+    "status": "disponivel",
+    "imagePath": "TI-0008.jpg",
+    "photoSource": "https://pixabay.com/photos/hdmi-connector-cable-plug-2202226/",
+    "photoAuthor": "WikimediaImages",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0009",
+    "name": "Cabo USB-C 1 m",
+    "category": "cabo",
+    "status": "disponivel",
+    "imagePath": "TI-0009.jpg",
+    "photoSource": "https://pixabay.com/photos/cable-charging-cable-usb-7066127/",
+    "photoAuthor": "Alexandra_Koch",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0010",
+    "name": "Cabo de rede 3 m",
+    "category": "cabo",
+    "status": "manutencao",
+    "imagePath": "TI-0010.jpg",
+    "photoSource": "https://pixabay.com/photos/network-cable-cable-patch-494649/",
+    "photoAuthor": "blickpixel",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0011",
+    "name": "Webcam Full HD",
+    "category": "camera",
+    "status": "disponivel",
+    "imagePath": "TI-0011.jpg",
+    "photoSource": "https://pixabay.com/photos/camera-photography-photographer-8670926/",
+    "photoAuthor": "MrTozzo",
+    "photoLicense": "Pixabay Content License"
+  },
+  {
+    "assetTag": "TI-0012",
+    "name": "Câmera compacta",
+    "category": "camera",
+    "status": "disponivel",
+    "imagePath": "TI-0012.jpg",
+    "photoSource": "https://pixabay.com/photos/camera-digital-photography-1362419/",
+    "photoAuthor": "maddyjaya",
+    "photoLicense": "Pixabay Content License"
+  }
+]
