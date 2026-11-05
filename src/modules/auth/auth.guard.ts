@@ -1,10 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { z } from 'zod';
@@ -45,7 +39,7 @@ export class AuthGuard implements CanActivate {
 
     // Token válido, mas sem membership: autenticado e sem acesso (CA-04).
     const claims = tenantClaims.safeParse(payload);
-    if (!claims.success) throw new ForbiddenException(NO_ACCESS_MESSAGE);
+    if (!claims.success) throw new UnauthorizedException(NO_ACCESS_MESSAGE);
 
     RequestContext.setAuth({
       userId: claims.data.sub,
