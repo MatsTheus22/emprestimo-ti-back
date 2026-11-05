@@ -55,7 +55,12 @@ beforeAll(async () => {
       data: { userId: user, tenantId: tenant, role: 'colaborador' },
     });
     const equipment = await prisma.equipment.create({
-      data: { tenantId: tenant, category: 'Notebook', name: 'Notebook ' + slug },
+      data: {
+        tenantId: tenant,
+        category: 'notebook',
+        name: 'Notebook ' + slug,
+        assetTag: 'TI-0001',
+      },
     });
     await prisma.loan.create({
       data: { tenantId: tenant, equipmentId: equipment.id, userId: user },

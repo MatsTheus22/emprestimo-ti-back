@@ -43,18 +43,25 @@ model Membership {
 
 // Catálogo do PRD item 2. Cabo é item individual, como os demais.
 model Equipment {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  category  String
-  name      String
-  assetTag  String?  @map("asset_tag")
-  status    String   @default("disponivel")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  category     String
+  name         String
+  assetTag     String   @map("asset_tag")
+  status       String   @default("disponivel")
+  // Caminho no bucket `equipamentos`; a URL pública é montada por quem exibe.
+  imagePath    String?  @map("image_path")
+  // Créditos da foto (spec 003).
+  photoSource  String?  @map("photo_source")
+  photoAuthor  String?  @map("photo_author")
+  photoLicense String?  @map("photo_license")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   loans  Loan[]
 
+  @@unique([tenantId, assetTag])
   @@map("equipment")
 }
 
