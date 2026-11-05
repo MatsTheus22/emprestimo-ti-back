@@ -5,17 +5,21 @@ import { loadEnv } from '../src/config/env';
 import { seedTenant } from './seed';
 
 // Spec 001 CA-03: usuários de demonstração (layout.md §9) para desenvolver
-// e testar o login. Só roda contra o Supabase local: a senha é fixa e
-// pública, então nunca pode existir num ambiente real.
-export const DEMO_PASSWORD = 'emprestai-dev';
+// e testar o login. Só roda contra o Supabase local, e a senha vem do
+// ambiente: nenhuma senha em código ou no git (rules/secrets.md).
+export function requireDemoPassword(source: NodeJS.ProcessEnv = process.env): string {
+  const password = source.DEMO_SEED_PASSWORD;
+  if (!password) throw new Error('Defina DEMO_SEED_PASSWORD no .env para rodar o seed-demo.');
+  return password;
+}
 
 export const DEMO_USERS = [
-  { email: 'ana.ribeiro@emprestai.local', displayName: 'Ana Ribeiro', role: 'colaborador' },
-  { email: 'marcos.lemos@emprestai.local', displayName: 'Marcos Lemos', role: 'colaborador' },
-  { email: 'julia.prado@emprestai.local', displayName: 'Júlia Prado', role: 'colaborador' },
-  { email: 'rafael.souza@emprestai.local', displayName: 'Rafael Souza', role: 'colaborador' },
-  { email: 'camila.nunes@emprestai.local', displayName: 'Camila Nunes', role: 'colaborador' },
-  { email: 'operacoes@emprestai.local', displayName: 'Operações TI', role: 'operacoes' },
+  { email: 'ana.ribeiro@dev.local', displayName: 'Ana Ribeiro', role: 'colaborador' },
+  { email: 'marcos.lemos@dev.local', displayName: 'Marcos Lemos', role: 'colaborador' },
+  { email: 'julia.prado@dev.local', displayName: 'Júlia Prado', role: 'colaborador' },
+  { email: 'rafael.souza@dev.local', displayName: 'Rafael Souza', role: 'colaborador' },
+  { email: 'camila.nunes@dev.local', displayName: 'Camila Nunes', role: 'colaborador' },
+  { email: 'operacoes@dev.local', displayName: 'Operações TI', role: 'operacoes' },
 ] as const;
 
 const LOCAL_HOSTS = new Set(['127.0.0.1', 'localhost']);
@@ -39,13 +43,13 @@ async function findUserIdByEmail(admin: SupabaseClient, email: string): Promise<
   }
 }
 
-async function ensureUser(admin: SupabaseClient, email: string): Promise<string> {
+async function ensureUser(admin: SupabaseClient, email: string, password: string): Promise<string> {
   const existing = await findUserIdByEmail(admin, email);
   if (existing) return existing;
 
   const { data, error } = await admin.auth.admin.createUser({
     email,
-    password: DEMO_PASSWORD,
+    password,
     email_confirm: true,
   });
   if (error) throw error;
@@ -56,6 +60,7 @@ async function main(): Promise<void> {
   if (existsSync('.env')) process.loadEnvFile('.env');
   const env = loadEnv();
   assertLocalSupabase(env.SUPABASE_URL);
+  const password = requireDemoPassword();
 
   const admin = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
@@ -65,7 +70,7 @@ async function main(): Promise<void> {
   try {
     const tenant = await seedTenant(prisma);
     for (const demo of DEMO_USERS) {
-      const userId = await ensureUser(admin, demo.email);
+      const userId = await ensureUser(admin, demo.email, password);
       await prisma.membership.upsert({
         where: { userId_tenantId: { userId, tenantId: tenant.id } },
         update: { role: demo.role, displayName: demo.displayName },
@@ -73,7 +78,6 @@ async function main(): Promise<void> {
       });
       console.log(`${demo.role.padEnd(11)} ${demo.email}`);
     }
-    console.log(`senha de todos: ${DEMO_PASSWORD}`);
   } finally {
     await prisma.$disconnect();
   }

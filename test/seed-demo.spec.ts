@@ -1,4 +1,4 @@
-import { assertLocalSupabase, DEMO_USERS } from '../prisma/seed-demo';
+import { assertLocalSupabase, DEMO_USERS, requireDemoPassword } from '../prisma/seed-demo';
 
 // Spec 001 CA-03: seed-demo só roda contra o Supabase local.
 
@@ -14,6 +14,11 @@ describe('seed-demo', () => {
     expect(() => assertLocalSupabase('https://abcd1234.supabase.co')).toThrow(
       /só roda contra o Supabase local/,
     );
+  });
+
+  it('test_ca_03_recusa_rodar_sem_senha_no_ambiente', () => {
+    expect(() => requireDemoPassword({})).toThrow(/DEMO_SEED_PASSWORD/);
+    expect(requireDemoPassword({ DEMO_SEED_PASSWORD: 'x' })).toBe('x');
   });
 
   it('test_ca_03_cria_cinco_colaboradores_e_um_de_operacoes', () => {
