@@ -42,6 +42,22 @@ describe('OpenAPI', () => {
     ]);
   });
 
+  // Spec 004.
+  it('test_ca_05_documenta_equipment_com_bearer_cursor_e_erros_problem_json', () => {
+    const equipment = document.paths['/v1/equipment']?.get;
+
+    expect(equipment?.security).toEqual([{ bearer: [] }]);
+    expect((equipment?.parameters ?? []).map((p) => ('name' in p ? p.name : ''))).toEqual(
+      expect.arrayContaining(['cursor', 'limit']),
+    );
+    expect(JSON.stringify(equipment?.responses['200'])).toContain(
+      '#/components/schemas/EquipmentListDto_Output',
+    );
+    for (const status of ['400', '401', '403']) {
+      expect(contentTypes(equipment?.responses[status])).toEqual(['application/problem+json']);
+    }
+  });
+
   it('test_ca_09_openapi_json_commitado_esta_atualizado', () => {
     const committed = readFileSync('openapi.json', 'utf8');
 
