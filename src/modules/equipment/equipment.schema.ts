@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { paginationQuerySchema } from '../../common/pagination';
+import { nextCursorSchema, paginationQuerySchema } from '../../common/pagination';
 
 export class ListEquipmentQueryDto extends createZodDto(paginationQuerySchema) {}
 
@@ -14,11 +14,12 @@ export const EquipmentListSchema = z.object({
       name: z.string(),
       category: z.enum(['notebook', 'monitor', 'cabo', 'camera']),
       status: z.enum(['disponivel', 'emprestado', 'manutencao']),
-      imagePath: z.string().nullable(),
+      // min(1): ver o comentário em common/pagination.ts.
+      imagePath: z.string().min(1).nullable(),
       myLoan: z.object({ dueAt: z.iso.datetime() }).nullable(),
     }),
   ),
-  nextCursor: z.string().nullable(),
+  nextCursor: nextCursorSchema,
   totals: z.object({ total: z.number().int(), available: z.number().int() }),
 });
 

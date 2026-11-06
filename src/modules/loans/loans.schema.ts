@@ -1,6 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import { z } from 'zod';
-import { paginationQuerySchema } from '../../common/pagination';
+import { nextCursorSchema, paginationQuerySchema } from '../../common/pagination';
 
 // O usuário e o tenant vêm só do token (ADR-001 §6): campos a mais são descartados.
 export class CreateLoanDto extends createZodDto(z.object({ equipmentId: z.uuid() })) {}
@@ -28,7 +28,7 @@ export class ListMyLoansQueryDto extends createZodDto(
 
 export const MyLoansSchema = z.object({
   items: z.array(LoanSchema.extend({ overdue: z.boolean() })),
-  nextCursor: z.string().nullable(),
+  nextCursor: nextCursorSchema,
   totals: z.object({ open: z.number().int(), overdue: z.number().int() }),
 });
 

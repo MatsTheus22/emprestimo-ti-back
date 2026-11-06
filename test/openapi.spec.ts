@@ -12,6 +12,13 @@ function contentTypes(response: unknown): string[] {
   return Object.keys(content ?? {});
 }
 
+function propriedades(schema: string): Record<string, unknown> {
+  const declarado = document.components?.schemas?.[schema] as {
+    properties: Record<string, unknown>;
+  };
+  return declarado.properties;
+}
+
 beforeAll(async () => {
   document = await buildOpenApiDocument();
 });
@@ -83,6 +90,27 @@ describe('OpenAPI', () => {
     for (const status of ['400', '401', '403']) {
       expect(contentTypes(loans?.responses[status])).toEqual(['application/problem+json']);
     }
+  });
+
+  // Spec 004: o orval recusa o contrato com `type` em array, e o @nestjs/swagger lê
+  // esse formato como lista. A resposta da API continuava certa, então só isto pega.
+  it('test_ca_05_nenhum_schema_do_contrato_tem_type_em_array', () => {
+    expect(JSON.stringify(document.components?.schemas)).not.toMatch(/"type":\[/);
+  });
+
+  it.each(['EquipmentListDto_Output', 'MyLoansDto_Output'])(
+    'test_ca_05_next_cursor_de_%s_e_string_anulavel',
+    (schema) => {
+      expect(propriedades(schema).nextCursor).toMatchObject({ type: 'string', nullable: true });
+    },
+  );
+
+  it('test_ca_05_caminho_da_imagem_e_string_anulavel', () => {
+    const { items } = propriedades('EquipmentListDto_Output') as {
+      items: { items: { properties: Record<string, unknown> } };
+    };
+
+    expect(items.items.properties.imagePath).toMatchObject({ type: 'string', nullable: true });
   });
 
   it('test_ca_09_openapi_json_commitado_esta_atualizado', () => {

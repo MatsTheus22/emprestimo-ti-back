@@ -457,10 +457,9 @@
                   ]
                 },
                 "imagePath": {
-                  "type": [
-                    "string",
-                    "null"
-                  ]
+                  "type": "string",
+                  "minLength": 1,
+                  "nullable": true
                 },
                 "myLoan": {
                   "type": "object",
@@ -491,10 +490,9 @@
             }
           },
           "nextCursor": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "type": "string",
+            "minLength": 1,
+            "nullable": true
           },
           "totals": {
             "type": "object",
@@ -666,10 +664,9 @@
             }
           },
           "nextCursor": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "type": "string",
+            "minLength": 1,
+            "nullable": true
           },
           "totals": {
             "type": "object",
