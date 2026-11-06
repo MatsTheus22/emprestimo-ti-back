@@ -65,7 +65,9 @@ model Equipment {
   @@map("equipment")
 }
 
-// PRD itens 3-5. Atraso é calculado (dueAt < now() e returnedAt nulo),
+// PRD itens 3-5. Um empréstimo aberto por equipamento: índice único parcial
+// loans_one_open_per_equipment, em SQL bruto (spec 004). Atraso é calculado
+// (dueAt < now() e returnedAt nulo),
 // não persistido. Limite de 3 itens simultâneos fica na camada de
 // aplicação, não é constraint de banco.
 model Loan {
