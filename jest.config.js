@@ -10,4 +10,7 @@ module.exports = {
   transform: { '^.+\\.ts$': ['ts-jest', { tsconfig: { isolatedModules: true } }] },
   testEnvironment: 'node',
   setupFiles: ['<rootDir>/test/setup-env.ts'],
+  // Vários testes sobem a app Nest ou abrem um processo com ts-node: com a máquina
+  // ocupada, o padrão de 5 s derrubava test_ca_10_duas_invocacoes_um_bootstrap.
+  testTimeout: 30000,
 };
