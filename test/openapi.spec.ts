@@ -70,6 +70,21 @@ describe('OpenAPI', () => {
     }
   });
 
+  it('test_ca_15_documenta_loans_me_com_bearer_cursor_e_erros_problem_json', () => {
+    const loans = document.paths['/v1/loans/me']?.get;
+
+    expect(loans?.security).toEqual([{ bearer: [] }]);
+    expect((loans?.parameters ?? []).map((p) => ('name' in p ? p.name : ''))).toEqual(
+      expect.arrayContaining(['cursor', 'limit']),
+    );
+    expect(JSON.stringify(loans?.responses['200'])).toContain(
+      '#/components/schemas/MyLoansDto_Output',
+    );
+    for (const status of ['400', '401', '403']) {
+      expect(contentTypes(loans?.responses[status])).toEqual(['application/problem+json']);
+    }
+  });
+
   it('test_ca_09_openapi_json_commitado_esta_atualizado', () => {
     const committed = readFileSync('openapi.json', 'utf8');
 

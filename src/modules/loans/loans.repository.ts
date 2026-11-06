@@ -16,6 +16,13 @@ export type CreateLoanResult =
 
 const UNIQUE_VIOLATION = 'P2002';
 
+const LOAN_SELECT = {
+  id: true,
+  borrowedAt: true,
+  dueAt: true,
+  equipment: { select: { id: true, assetTag: true, name: true, category: true } },
+} as const;
+
 // Com connection_limit=1, um pedido pode esperar o outro, e cada query cruza dos
 // EUA até São Paulo (ADR-001 §9): os padrões do Prisma (2 s e 5 s) virariam erro 500.
 const OPCOES_DA_TRANSACAO = { maxWait: 10_000, timeout: 15_000 };
@@ -40,6 +47,41 @@ export class LoansRepository {
       if (isUniqueViolation(error)) return { outcome: 'unavailable' };
       throw error;
     }
+  }
+
+  // Filtrado por usuário E tenant: empréstimo de outra pessoa nunca sai do banco,
+  // nem com um cursor que aponte para ele.
+  listOpen({
+    tenantId,
+    userId,
+    cursor,
+    take,
+  }: {
+    tenantId: string;
+    userId: string;
+    cursor?: string;
+    take: number;
+  }): Promise<LoanRow[]> {
+    return this.prisma.loan.findMany({
+      where: { tenantId, userId, returnedAt: null },
+      orderBy: [{ borrowedAt: 'asc' }, { id: 'asc' }],
+      take,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      select: LOAN_SELECT,
+    });
+  }
+
+  async openTotals(
+    tenantId: string,
+    userId: string,
+    agora: Date,
+  ): Promise<{ open: number; overdue: number }> {
+    const abertos = { tenantId, userId, returnedAt: null };
+    const [open, overdue] = await Promise.all([
+      this.prisma.loan.count({ where: abertos }),
+      this.prisma.loan.count({ where: { ...abertos, dueAt: { lt: agora } } }),
+    ]);
+    return { open, overdue };
   }
 
   private async createInTransaction(
@@ -82,12 +124,7 @@ export class LoansRepository {
         borrowedAt: agora,
         dueAt: await this.calcularDevolucao(tx, agora),
       },
-      select: {
-        id: true,
-        borrowedAt: true,
-        dueAt: true,
-        equipment: { select: { id: true, assetTag: true, name: true, category: true } },
-      },
+      select: LOAN_SELECT,
     });
 
     await tx.auditLog.create({
