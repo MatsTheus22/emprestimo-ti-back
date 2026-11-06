@@ -6,11 +6,20 @@ import { EnvModule } from './config/env.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EquipmentModule } from './modules/equipment/equipment.module';
 import { HealthModule } from './modules/health/health.module';
+import { LoansModule } from './modules/loans/loans.module';
 import { MeModule } from './modules/me/me.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
-  imports: [EnvModule, PrismaModule, AuthModule, HealthModule, MeModule, EquipmentModule],
+  imports: [
+    EnvModule,
+    PrismaModule,
+    AuthModule,
+    HealthModule,
+    MeModule,
+    EquipmentModule,
+    LoansModule,
+  ],
   providers: [
     // ADR-001 §3: a entrada é validada pelo mesmo schema Zod que gera o
     // OpenAPI; a resposta é filtrada pelo schema declarado em @ZodResponse.

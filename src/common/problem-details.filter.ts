@@ -41,12 +41,18 @@ export class ProblemDetailsFilter implements ExceptionFilter {
   }
 }
 
-function detailsFrom(exception: HttpException): Pick<ProblemDetails, 'detail' | 'errors'> {
+function detailsFrom(exception: HttpException): Partial<ProblemDetails> {
   const body = exception.getResponse();
   if (typeof body === 'string') return { detail: body };
 
-  const { message, errors } = body as { message?: unknown; errors?: unknown };
+  const { type, message, errors } = body as {
+    type?: unknown;
+    message?: unknown;
+    errors?: unknown;
+  };
   return {
+    // Spec 004: recusa de negócio tem `type` próprio, para o front decidir por ele.
+    ...(typeof type === 'string' && { type }),
     ...(typeof message === 'string' && { detail: message }),
     ...(errors !== undefined && { errors }),
   };

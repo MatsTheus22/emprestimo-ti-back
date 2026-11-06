@@ -58,6 +58,18 @@ describe('OpenAPI', () => {
     }
   });
 
+  it('test_ca_08_documenta_post_loans_com_bearer_e_erros_problem_json', () => {
+    const loans = document.paths['/v1/loans']?.post;
+
+    expect(loans?.security).toEqual([{ bearer: [] }]);
+    expect(JSON.stringify(loans?.responses['201'])).toContain(
+      '#/components/schemas/LoanDto_Output',
+    );
+    for (const status of ['400', '401', '403', '404', '409']) {
+      expect(contentTypes(loans?.responses[status])).toEqual(['application/problem+json']);
+    }
+  });
+
   it('test_ca_09_openapi_json_commitado_esta_atualizado', () => {
     const committed = readFileSync('openapi.json', 'utf8');
 
