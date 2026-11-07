@@ -116,9 +116,8 @@ async function perguntarNoTerminal(texto: string): Promise<string> {
   }
 }
 
-async function main(): Promise<void> {
-  const { values } = parseArgs({ options: { alvo: { type: 'string' } } });
-  const datasourceUrl = await resolverUrl(values.alvo, {
+export function ambienteDoProcesso(): Ambiente {
+  return {
     env: process.env,
     isTTY: process.stdin.isTTY === true,
     carregarArquivoEnv: () => {
@@ -126,7 +125,12 @@ async function main(): Promise<void> {
     },
     perguntar: perguntarNoTerminal,
     avisar: (texto) => console.log(texto),
-  });
+  };
+}
+
+async function main(): Promise<void> {
+  const { values } = parseArgs({ options: { alvo: { type: 'string' } } });
+  const datasourceUrl = await resolverUrl(values.alvo, ambienteDoProcesso());
 
   const prisma = new PrismaClient({ datasourceUrl });
   try {

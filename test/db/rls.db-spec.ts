@@ -77,7 +77,10 @@ afterAll(async () => {
 
 describe.each(TABLES)('RLS em $table', ({ table, tenantColumn }) => {
   it(`test_ca_04_${table}_tenant_b_nao_ve_linhas_do_tenant_a`, async () => {
-    const tenants = await visibleTenants(table, tenantColumn, { tenant_id: TENANT_B });
+    const tenants = await visibleTenants(table, tenantColumn, {
+      tenant_id: TENANT_B,
+      sub: USER_B,
+    });
 
     expect(tenants).toEqual([TENANT_B]);
   });

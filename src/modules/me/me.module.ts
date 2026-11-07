@@ -6,5 +6,6 @@ import { MeService } from './me.service';
 @Module({
   controllers: [MeController],
   providers: [MeService, MeRepository],
+  exports: [MeService],
 })
 export class MeModule {}

@@ -11,8 +11,10 @@ function requireUrl(name: 'TEST_DATABASE_URL' | 'TEST_SUPERUSER_DATABASE_URL'): 
 }
 
 // Conecta como `postgres`, dono das tabelas — o mesmo papel da aplicação.
-export function createTestPrisma(): PrismaService {
-  return new PrismaService({ DATABASE_URL: requireUrl('TEST_DATABASE_URL') });
+// `parametros` vai na query string da conexão (ex.: connection_limit=1).
+export function createTestPrisma(parametros?: string): PrismaService {
+  const url = requireUrl('TEST_DATABASE_URL');
+  return new PrismaService({ DATABASE_URL: parametros ? `${url}?${parametros}` : url });
 }
 
 // Conecta como superusuário, para assumir papéis internos do Supabase.
