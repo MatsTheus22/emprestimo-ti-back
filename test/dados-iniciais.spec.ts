@@ -96,4 +96,51 @@ comSkill('dados iniciais contra as listas da skill', () => {
 
     expect(dados).toEqual(esperado);
   });
+
+  // Spec 005 CA-08: a cópia acompanha a troca das fotos nos 12 itens.
+  it('test_ca_08_creditos_iguais_a_creditos_json_nos_12', () => {
+    const { itens } = lerJson<{ itens: { patrimonio: string; origem: string; autor: string }[] }>(
+      path.join(SKILL, 'creditos.json'),
+    );
+
+    expect(
+      dados.map(({ assetTag, photoSource, photoAuthor }) => [assetTag, photoSource, photoAuthor]),
+    ).toEqual(itens.map(({ patrimonio, origem, autor }) => [patrimonio, origem, autor]));
+  });
+});
+
+// Spec 005 CA-08: os 6 itens com foto trocada trazem os créditos da foto nova. Roda também
+// num clone só do back.
+describe('créditos das fotos trocadas na spec 005', () => {
+  const TROCADAS: Record<string, [string, string]> = {
+    'TI-0001': ['https://pixabay.com/photos/laptop-computer-notebook-2665794/', 'chapay'],
+    'TI-0004': [
+      'https://pixabay.com/photos/coffee-caffeine-beverage-table-2425303/',
+      'Engin_Akyurt',
+    ],
+    'TI-0006': [
+      'https://pixabay.com/photos/blank-business-computer-desktop-17894/',
+      'PublicDomainPictures',
+    ],
+    'TI-0007': [
+      'https://pixabay.com/photos/blank-business-computer-desktop-17768/',
+      'PublicDomainPictures',
+    ],
+    'TI-0008': [
+      'https://pixabay.com/photos/high-definition-multimedia-1827/',
+      'PublicDomainPictures',
+    ],
+    'TI-0012': ['https://pixabay.com/photos/still-life-camera-notebook-pen-cup-601528/', 'stokpic'],
+  };
+
+  it('test_ca_08_seis_itens_com_os_creditos_da_foto_nova', () => {
+    for (const [assetTag, [photoSource, photoAuthor]] of Object.entries(TROCADAS)) {
+      expect(dados.find((item) => item.assetTag === assetTag)).toMatchObject({
+        photoSource,
+        photoAuthor,
+        photoLicense: 'Pixabay Content License',
+        imagePath: `${assetTag}.jpg`,
+      });
+    }
+  });
 });
