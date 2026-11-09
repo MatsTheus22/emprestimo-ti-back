@@ -23,8 +23,7 @@ const LOAN_SELECT = {
   equipment: { select: { id: true, assetTag: true, name: true, category: true } },
 } as const;
 
-// Com connection_limit=1, um pedido pode esperar o outro, e cada query cruza dos
-// EUA até São Paulo (ADR-001 §9): os padrões do Prisma (2 s e 5 s) virariam erro 500.
+// Com connection_limit=1, um pedido pode esperar o outro: os padrões do Prisma (2 s e 5 s) virariam erro 500.
 const OPCOES_DA_TRANSACAO = { maxWait: 10_000, timeout: 15_000 };
 
 @Injectable()
