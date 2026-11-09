@@ -110,60 +110,73 @@ comArquivo('atualizar-creditos.sql', () => {
     for (const comando of comandos.slice(1, -1)) expect(comando).toMatch(/^update equipment\n/);
   });
 
-  it('test_ca_09_troca_so_os_creditos_dos_6_com_o_mesmo_updated_at', async () => {
+  // Prepara o estado anterior, roda os 6 UPDATE do arquivo e confere o resultado, em `tx`.
+  async function aplicarEConferir(tx: Prisma.TransactionClient): Promise<void> {
     const outroTenant = randomUUID();
+    await tx.$executeRaw`insert into tenants (slug, name) values ('suporte_ti', 'Suporte de TI')
+      on conflict (slug) do nothing`;
+    const { id: suporte } = await tx.tenant.findUniqueOrThrow({ where: { slug: 'suporte_ti' } });
+    await tx.tenant.create({
+      data: { id: outroTenant, slug: 'outro_' + outroTenant, name: 'Outro' },
+    });
+    await tx.equipment.createMany({
+      data: [...estadoAnterior(suporte), ...estadoAnterior(outroTenant)],
+    });
 
+    const linhas = (tenantId: string) =>
+      tx.equipment.findMany({ where: { tenantId }, orderBy: { assetTag: 'asc' } });
+    const antesSuporte = await linhas(suporte);
+    const antesOutro = await linhas(outroTenant);
+
+    for (const comando of comandosDoArquivo().slice(1, -1)) {
+      await expect(tx.$executeRawUnsafe(comando)).resolves.toBe(1);
+    }
+
+    const depois = await linhas(suporte);
+    const iniciais = lerEquipamentosIniciais();
+    expect(depois).toHaveLength(12);
+    for (const [indice, linha] of depois.entries()) {
+      const antes = antesSuporte[indice];
+      if (!TROCADOS.includes(linha.assetTag)) {
+        expect(linha).toEqual(antes);
+        continue;
+      }
+      const inicial = iniciais.find((item) => item.assetTag === linha.assetTag);
+      expect(linha).toEqual({
+        ...antes,
+        photoSource: inicial?.photoSource,
+        photoAuthor: inicial?.photoAuthor,
+        updatedAt: expect.any(Date) as Date,
+      });
+      // A coluna é lida como UTC: a hora gravada precisa ser a de agora, em UTC.
+      expect(Math.abs(linha.updatedAt.getTime() - Date.now())).toBeLessThan(5 * 60_000);
+    }
+
+    // As 6 trocadas têm o now() da transação em UTC; as outras 6 continuam com outro valor.
+    const comNowDaTransacao = await tx.$queryRaw<{ asset_tag: string }[]>`
+      select asset_tag from equipment
+      where tenant_id = ${suporte}::uuid
+        and updated_at = (now() at time zone 'UTC')::timestamp(3)
+      order by asset_tag`;
+    expect(comNowDaTransacao.map((linha) => linha.asset_tag)).toEqual(TROCADOS);
+    const outras = depois.filter((linha) => !TROCADOS.includes(linha.assetTag));
+    for (const linha of outras) expect(linha.updatedAt).toEqual(ANTES);
+
+    expect(await linhas(outroTenant)).toEqual(antesOutro);
+    expect(await tx.equipment.count({ where: { tenantId: { in: [suporte, outroTenant] } } })).toBe(
+      24,
+    );
+  }
+
+  it('test_ca_09_troca_so_os_creditos_dos_6_com_o_mesmo_updated_at', async () => {
+    await emTransacaoDesfeita(prisma, aplicarEConferir);
+  });
+
+  // A coluna é sem fuso: now() puro gravaria a hora local da sessão, como o due_at na spec 004.
+  it('test_ca_09_updated_at_em_utc_com_a_sessao_em_outro_fuso', async () => {
     await emTransacaoDesfeita(prisma, async (tx) => {
-      await tx.$executeRaw`insert into tenants (slug, name) values ('suporte_ti', 'Suporte de TI')
-        on conflict (slug) do nothing`;
-      const { id: suporte } = await tx.tenant.findUniqueOrThrow({ where: { slug: 'suporte_ti' } });
-      await tx.tenant.create({
-        data: { id: outroTenant, slug: 'outro_' + outroTenant, name: 'Outro' },
-      });
-      await tx.equipment.createMany({
-        data: [...estadoAnterior(suporte), ...estadoAnterior(outroTenant)],
-      });
-
-      const linhas = (tenantId: string) =>
-        tx.equipment.findMany({ where: { tenantId }, orderBy: { assetTag: 'asc' } });
-      const antesSuporte = await linhas(suporte);
-      const antesOutro = await linhas(outroTenant);
-
-      for (const comando of comandosDoArquivo().slice(1, -1)) {
-        await expect(tx.$executeRawUnsafe(comando)).resolves.toBe(1);
-      }
-
-      const depois = await linhas(suporte);
-      const iniciais = lerEquipamentosIniciais();
-      expect(depois).toHaveLength(12);
-      for (const [indice, linha] of depois.entries()) {
-        const antes = antesSuporte[indice];
-        if (!TROCADOS.includes(linha.assetTag)) {
-          expect(linha).toEqual(antes);
-          continue;
-        }
-        const inicial = iniciais.find((item) => item.assetTag === linha.assetTag);
-        expect(linha).toEqual({
-          ...antes,
-          photoSource: inicial?.photoSource,
-          photoAuthor: inicial?.photoAuthor,
-          updatedAt: expect.any(Date) as Date,
-        });
-      }
-
-      // As 6 trocadas têm o now() da transação; as outras 6 continuam com outro valor.
-      const comNowDaTransacao = await tx.$queryRaw<{ asset_tag: string }[]>`
-        select asset_tag from equipment
-        where tenant_id = ${suporte}::uuid and updated_at = now()::timestamp(3)
-        order by asset_tag`;
-      expect(comNowDaTransacao.map((linha) => linha.asset_tag)).toEqual(TROCADOS);
-      const outras = depois.filter((linha) => !TROCADOS.includes(linha.assetTag));
-      for (const linha of outras) expect(linha.updatedAt).toEqual(ANTES);
-
-      expect(await linhas(outroTenant)).toEqual(antesOutro);
-      expect(
-        await tx.equipment.count({ where: { tenantId: { in: [suporte, outroTenant] } } }),
-      ).toBe(24);
+      await tx.$executeRaw`set local time zone 'America/Sao_Paulo'`;
+      await aplicarEConferir(tx);
     });
   });
 });
